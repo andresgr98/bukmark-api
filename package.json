@@ -1,0 +1,21 @@
+{
+  "name": "bukmark-api",
+  "version": "1.0.0",
+  "description": "bukmark API. Created by Andrés Gómez Reyes",
+  "main": "index.js",
+  "repository": "https://github.com/andresgr98/bukmark-api.git",
+  "author": "andres <gomezand15@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.17.1",
+    "js-sha512": "^0.8.0",
+    "mongoose": "^5.12.13",
+    "passport-jwt": "^4.0.0"
+  },
+  "devDependencies": {
+    "dotenv": "^10.0.0"
+  },
+  "scripts": {
+    "dev": "nodemon index -e js,tpl"
+  }
+}
