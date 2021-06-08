@@ -5,51 +5,38 @@ const router = express.Router();
 const sha512 = require("js-sha512");
 const collectionModel = require("../models/collectionModel");
 const userModel = require("../models/userModel");
+const bookModel = require("../models/bookModel");
 
 /* ************************************************************************************************ */
 
-router.route("/users")
-  /* ---------------------LISTAR USUARIOS-------------------- */
+router.route("/books")
+  /* ---------------------LISTAR LIBROS-------------------- */
   .get(async (req, res) => {
     try {
       const limit = req.query.hasOwnProperty("limit")
         ? parseInt(req.query.limit)
         : 50;
-      let userList = await userModel.find().sort({ firstname: "ASC", lastname: "ASC" }).limit(limit).exec();
-      userList = userList.map((user) => {
-        //duplicamos el array userList y le borramos la contraseña para no devolver nada sensible
-        user = user.toJSON();
-        delete user.password;
-        return user;
-      });
-      res.json(userList);
+      let bookList = await userModel.find().sort({ title: "DESC" }).limit(limit).exec();
+      res.json(bookList);
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
   })
-  /* ---------------------CREAR USUARIO------------------------- */
-  .post(async (req, res) => {
+  /* ---------------------CREAR LIBRO------------------------- */
+  /* .post(async (req, res) => {
     try {
-      let userData = req.body;
-      userData.profile = "user";
-      userData.password = sha512(userData.password);
-      userData.collections = []
-      userData = await new userModel(userData).save();
-      let collectionData = {
-        title: "Lista de lectura",
-        user:  userData._id,
-        books: []
+      let bookData = req.body;
+      let bookExists = await bookModel.findOne({olid: bookData.olid}).exec()
+      if (bookExists){
+        res.status(409).json({message: "El libro ya está en la base de datos de Bukmark MongoDB"})
+        return
       }
-      let collection = await new collectionModel(collectionData).save()
-      userData.collections.push({_id: collection._id})
-      userData.save()
-      userData = userData.toJSON();
-      delete userData.password; //borramos la contraseña despues de haberse creado el usuario en la BD, asi que no se pierde y no se muestra al usuario
-      res.status(201).json(userData);
+      let book = await new bookModel(bookData).save()
+      res.status(201).json(book);
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
-  });
+  }); */
 
 /* ************************************************************************************************ */
 
@@ -65,7 +52,7 @@ router.route("/users/:userID")
         });
         return;
       } */
-      let foundUser = await userModel.findById(userID).populate("collections").populate("reading").exec();
+      let foundUser = await userModel.findById(userID).exec();
       if (!foundUser) {
         res.status(404).json({
           message: `Usuario con identificador ${userID} no encontrado.`,

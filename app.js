@@ -4,7 +4,8 @@ const express = require('express')
 const database = require('./modules/database')
 
 //middlewares con las rutas
-//const indexController = require('./controllers/IndexController')
+const userController = require('./controllers/userController')
+const collectionController = require('./controllers/collectionController')
 
 
 //server instance
@@ -18,7 +19,8 @@ app.use(cors()) */
 app.use(express.json())
 
 //enganchamos los controladores de los diferentes recursos
-//app.use(indexController)
+app.use(userController)
+app.use(collectionController)
 
 database.connect()
 
