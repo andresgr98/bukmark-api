@@ -65,7 +65,7 @@ router.route("/users/:userID")
         });
         return;
       } */
-      let foundUser = await userModel.findById(userID).populate("collections").populate("reading").exec();
+      let foundUser = await userModel.findById(userID).populate("collections._id").populate("reading._id").exec();
       if (!foundUser) {
         res.status(404).json({
           message: `Usuario con identificador ${userID} no encontrado.`,
@@ -121,7 +121,9 @@ router.route("/users/:userID")
         });
         return;
       } */
-      const deletedUser = await userModel.findOneAndDelete({ _id: userID }).exec();
+      const deletedUser = await userModel.findOneAndDelete({ _id: userID }).exec()
+      deletedUser.collections.map((col) => col._id)
+      await collectionModel.deleteMany({"user" : userID})
       if (!deletedUser) {
         res.status(404).json({
           message: `Usuario con identificador ${userID} no encontrado.`,
