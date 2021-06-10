@@ -61,7 +61,7 @@ router.route('/users/:userID/collections/:collectionID')
   .get(async (req, res) => {
     try{
       const collectionID = req.params.collectionID
-      const foundCollection = await collectionModel.findById(collectionID).exec()
+      const foundCollection = await collectionModel.findById(collectionID).populate("books._id").exec()
       if (!foundCollection) {
         res.status(404).json({ message: `Colección con identificador ${collectionID} no encontrada.` })
         return

@@ -2,7 +2,7 @@
 
 const express = require('express')
 const database = require('./modules/database')
-
+const cors = require('cors')
 //middlewares con las rutas
 const userController = require('./controllers/userController')
 const collectionController = require('./controllers/collectionController')
@@ -11,8 +11,8 @@ const bookController = require('./controllers/bookController')
 //server instance
 const app = express()
 
-/* app.use(bearerToken())
-app.use(cors()) */
+//app.use(bearerToken())
+app.use(cors())
 
 
 //middleware para parsear los cuerpos tipo application/JSON en el cuerpo
