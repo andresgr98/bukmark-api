@@ -3,12 +3,14 @@
 const express = require("express");
 const router = express.Router();
 const bookModel = require("../models/bookModel");
+const authenticator = require('../modules/authenticator')
+const onlyRegisteredAccess = authenticator(true, ['user', 'admin'])
 
 /* ************************************************************************************************ */
 
 router.route("/books")
   /* ---------------------LISTAR LIBROS-------------------- */
-  .get(async (req, res) => {
+  .get(onlyRegisteredAccess, async (req, res) => {
     try {
       const limit = req.query.hasOwnProperty("limit")
         ? parseInt(req.query.limit)

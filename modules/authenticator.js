@@ -30,8 +30,6 @@ module.exports = function authenticator(requiredSession, allowedProfiles = []) {
 
       if (token) {
         req.tokenData = await jwt.verify(token, config.APP_SECRET)
-
-
       }
 
       if (requiredSession && allowedProfiles.indexOf(req.tokenData.profile) === -1) {

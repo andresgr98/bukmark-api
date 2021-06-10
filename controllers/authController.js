@@ -11,7 +11,7 @@ router.route('/auth/login')
   .post(async (req, res) => {
     const credentials = req.body
     credentials.password = sha512(credentials.password)
-    const foundUser = await userModel.findOne({email: credentials.email, password: credentials.password})
+    const foundUser = await userModel.findOne({nickname: credentials.nickname, password: credentials.password})
     if (!foundUser){
       res.status(401).json({message: 'Usuario y/o contraseña no válidos.'})
       return
@@ -28,3 +28,4 @@ router.route('/auth/login')
     })
     res.json({token: token})
   })
+  module.exports = router

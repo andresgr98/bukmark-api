@@ -7,14 +7,20 @@ const collectionModel = require('../models/collectionModel')
 const userModel = require('../models/userModel')
 const bookModel = require('../models/bookModel')
 
+const authenticator = require('../modules/authenticator')
+const onlyRegisteredAccess = authenticator(true, ['user', 'admin'])
+const onlyUserAccess = authenticator(true, ['user'])
+const onlyAdminAccess = authenticator(true, ['admin'])
+
 /* ************************************************************************************************ */
 
 
-router.route('/users/:userID/collections')
+router.route('/collections')
   /* ---------------LISTAR COLECCIONES DE UN USUARIO------------- */
-  .get(async (req, res) => {
+  .get(onlyRegisteredAccess, async (req, res) => {
     try {
-      const userID = req.params.userID
+      let token = req.tokenData
+      let userID = token._id
       let foundUser = await userModel.findById(userID).populate("collections._id").exec()
       if (!foundUser) {
         res.status(404).json({
@@ -29,7 +35,7 @@ router.route('/users/:userID/collections')
     }
   })
   /* ---------------CREAR COLECCION--------------- */
-  .post(async (req, res) => {
+  .post(onlyRegisteredAccess, async (req, res) => {
     try {
       const userID = req.params.userID
       let foundUser = await userModel.findById(userID).exec()
@@ -56,9 +62,9 @@ router.route('/users/:userID/collections')
 
 /* ************************************************************************************************ */
 
-router.route('/users/:userID/collections/:collectionID')
+router.route('/collections/:collectionID')
   /* --------------------OBTENER 1 COLECCION--------------- */
-  .get(async (req, res) => {
+  .get( async (req, res) => {
     try{
       const collectionID = req.params.collectionID
       const foundCollection = await collectionModel.findById(collectionID).populate("books._id").exec()
@@ -72,7 +78,7 @@ router.route('/users/:userID/collections/:collectionID')
     }
   })
   /* ---------------------AÑADIR 1 LIBRO A UNA COLECCION-------------------- */
-  .post (async (req, res) => {
+  .post (onlyRegisteredAccess, async (req, res) => {
     try{
       const collectionID = req.params.collectionID
       const foundCollection = await collectionModel.findById(collectionID).exec()
@@ -107,7 +113,7 @@ router.route('/users/:userID/collections/:collectionID')
     }
   })
   /* -------------------- EDITAR NOMBRE DE LA COLECCION ------------------- */
-  .put(async (req, res) => {
+  .put(onlyRegisteredAccess, async (req, res) => {
     try{
       const collectionID = req.params.collectionID
       const newName = req.body
@@ -122,7 +128,7 @@ router.route('/users/:userID/collections/:collectionID')
     }
   })
   /* -----------------BORRAR COLECCIÓN------------------------------*/
-  .delete(async (req, res) => {
+  .delete(onlyUserAccess, async (req, res) => {
     try{
       const userID = req.params.userID
       const collectionID = req.params.collectionID
@@ -152,9 +158,9 @@ router.route('/users/:userID/collections/:collectionID')
 
 
 
-router.route('/users/:userID/collections/:collectionID/books/:OLID')
+router.route('/collections/:collectionID/books/:OLID')
   /* ----------------ELIMINAR UN LIBRO DE UNA COLECCION--------------------- */
-  .delete(async (req, res) => {
+  .delete(onlyRegisteredAccess, async (req, res) => {
     try{
       const collectionID = req.params.collectionID
       const olid = req.params.olid

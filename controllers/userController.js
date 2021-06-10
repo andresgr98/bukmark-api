@@ -6,11 +6,16 @@ const sha512 = require("js-sha512");
 const collectionModel = require("../models/collectionModel");
 const userModel = require("../models/userModel");
 
+const authenticator = require('../modules/authenticator')
+const onlyRegisteredAccess = authenticator(true, ['user', 'admin'])
+const onlyUserAccess = authenticator(true, ['user'])
+const onlyAdminAccess = authenticator(true, ['admin'])
+
 /* ************************************************************************************************ */
 
 router.route("/users")
   /* ---------------------LISTAR USUARIOS-------------------- */
-  .get(async (req, res) => {
+  .get( async (req, res) => {
     try {
       const limit = req.query.hasOwnProperty("limit")
         ? parseInt(req.query.limit)
@@ -55,7 +60,7 @@ router.route("/users")
 
 router.route("/users/:userID")
   /* --------------------OBTENER 1 USUARIO---------------------- */
-  .get(async (req, res) => {
+  .get(onlyRegisteredAccess, async (req, res) => {
     try {
       const userID = req.params.userID;
       /* Comprobamos que el usuario esta intentando acceder a su propio perfil en caso de NO ser admin */
@@ -80,7 +85,7 @@ router.route("/users/:userID")
     }
   })
   /* -------------------- EDITAR NOMBRE DEL USUARIO ------------------- */
-  .put(async (req, res) => {
+  .put(onlyRegisteredAccess, async (req, res) => {
     try {
       const userID = req.params.userID;
       const userData = req.body;
@@ -111,7 +116,7 @@ router.route("/users/:userID")
     }
   })
   /* -----------------BORRAR USUARIO ---------------------------------*/
-  .delete(async (req, res) => {
+  .delete(onlyUserAccess, async (req, res) => {
     try {
       const userID = req.params.userID;
       /* Comprobamos que el usuario esta intentando editar a su propio perfil en caso de NO ser admin */

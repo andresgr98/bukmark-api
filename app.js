@@ -2,16 +2,19 @@
 
 const express = require('express')
 const database = require('./modules/database')
+const bearerToken = require('express-bearer-token');
+
 const cors = require('cors')
 //middlewares con las rutas
 const userController = require('./controllers/userController')
 const collectionController = require('./controllers/collectionController')
 const bookController = require('./controllers/bookController')
+const authController = require('./controllers/authController')
 
 //server instance
 const app = express()
 
-//app.use(bearerToken())
+app.use(bearerToken())
 app.use(cors())
 
 
@@ -22,6 +25,7 @@ app.use(express.json())
 app.use(userController)
 app.use(collectionController)
 app.use(bookController)
+app.use(authController)
 
 database.connect()
 
