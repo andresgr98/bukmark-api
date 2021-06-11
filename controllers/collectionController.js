@@ -131,7 +131,7 @@ router.route('/collections/:collectionID')
   /* -----------------BORRAR COLECCIÓN------------------------------*/
   .delete(onlyUserAccess, async (req, res) => {
     try{
-      const userID = req.params.userID
+      const userID = req.tokenData._id
       const collectionID = req.params.collectionID
       let user = await userModel.findById(userID).exec()
       const userCollectionIndex = user.collections.findIndex((col) => col._id == collectionID)
