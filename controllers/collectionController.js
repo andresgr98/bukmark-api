@@ -118,6 +118,11 @@ router.route('/collections/:collectionID')
     try{
       const collectionID = req.params.collectionID
       const newName = req.body
+      const foundCollection = await collectionModel.findById(collectionID).exec()
+      if (foundCollection.is_removable === false) {
+        res.status(401).json({message: "No puedes editar esta colección"})
+        return
+      }
       const updatedCollection = await collectionModel.findOneAndUpdate({_id: collectionID}, newName, { new: true }).exec()
       if (!updatedCollection) {
         res.status(404).json({ message: `Colección con identificador ${collectionID} no encontrada.` })
@@ -137,6 +142,11 @@ router.route('/collections/:collectionID')
       const userCollectionIndex = user.collections.findIndex((col) => col._id == collectionID)
       if (userCollectionIndex === -1){
         res.status(404).json({message: "No existe esa colección en este usuario."})
+        return
+      }
+      const foundCollection = await collectionModel.findById(collectionID).exec()
+      if (foundCollection.is_removable === false) {
+        res.status(401).json({message: "No puedes editar esta colección"})
         return
       }
       const deletedCollection = await collectionModel.findOne({_id: collectionID}).exec()
@@ -164,7 +174,7 @@ router.route('/collections/:collectionID/books/:OLID')
   .delete(onlyRegisteredAccess, async (req, res) => {
     try{
       const collectionID = req.params.collectionID
-      const olid = req.params.olid
+      const olid = req.params.OLID
       const foundCollection = await collectionModel.findById(collectionID).exec()
       if (!foundCollection) {
         res.status(404).json({ message: `Colección con identificador ${collectionID} no encontrada.` })
@@ -182,6 +192,47 @@ router.route('/collections/:collectionID/books/:OLID')
 
 
 /* ************************************************************************************************ */
+router.route("/reading")
+/* -----------AÑADIR LIBRO A LEYENDO ----------------- */
+.post(onlyRegisteredAccess, async (req, res) => {
+  try{
+    const newBook = req.body
+    const userID = req.tokenData._id
+    let foundUser = await userModel.findById(userID).populate("collections._id").exec()
+    const readingCollection = foundUser.collections.find((col) => col.is_removable === false)
+    if (!readingCollection){
+      res.status(404).json("No se ha encontrado la lista de lectura. Por favor, cree una nueva cuenta")
+      return
+    }
+  
+  let bookExists = await bookModel.findOne({olid: newBook.olid}).exec()
+  if (bookExists){
+    console.warn( "El libro ya está en la base de datos de Bukmark MongoDB")
+    console.log(bookExists.olid)
+    let fullCollection = await collectionModel.findById(readingCollection._id).populate("books._id").exec()
+    let existsInCollection = fullCollection.books.find((book) => book._id.olid === bookExists.olid)
+    if(existsInCollection){
+      res.status(409).json({message: "El libro ya está en la colección. Inténtalo con otro libro."})
+      return
+    }
+    foundCollection.books.push(bookExists._id )
+    foundCollection.save()
+    res.status(201).json("Libro añadido a la colección.")
+    return
+  }
+  /* Si la ejecución llega aquí, es que no existe el libro en la BD. Entonces lo creamos y lo guardamos */
+  let book = await new bookModel(newBook).save()
+  if (!foundCollection) {
+    res.status(404).json({ message: `Colección con identificador ${collectionID} no encontrada.` })
+    return
+  }
+  foundCollection.books.push(book._id)
+  foundCollection.save()
+}catch(error){
+res.status(500).json({ message: error.message })
+}
+
+})
 
 
 module.exports = router

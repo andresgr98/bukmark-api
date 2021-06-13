@@ -9,6 +9,7 @@ const collectionSchema = new Schema({
       _id: {type: Schema.Types.ObjectId, ref: 'books'}
     }
   ],
+  is_removable: { type: Boolean, default: true },
   published_at: {type: Date, default: Date.now},
   visibility: { type: String, enum: ["public", "private"], default: "private" }
 })

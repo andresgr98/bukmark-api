@@ -40,13 +40,22 @@ router.route("/users")
       userData.password = sha512(userData.password);
       userData.collections = []
       userData = await new userModel(userData).save();
-      let collectionData = {
+      let readingCollection = {
+        title: "Leyendo",
+        user:  userData._id,
+        books: [],
+        is_removable: false
+      }
+      let readingListCollection = {
         title: "Lista de lectura",
         user:  userData._id,
         books: []
       }
-      let collection = await new collectionModel(collectionData).save()
+      let collection = await new collectionModel(readingCollection).save()
       userData.collections.push({_id: collection._id})
+      let collection2 = await new collectionModel(readingListCollection).save()
+      userData.collections.push({_id: collection2._id})
+
       userData.save()
       userData = userData.toJSON();
       delete userData.password; //borramos la contraseña despues de haberse creado el usuario en la BD, asi que no se pierde y no se muestra al usuario
@@ -126,6 +135,8 @@ router.route("/users/:userID")
         });
         return;
       } */
+      let foundUser = await userModel.findById(userID).populate("collections._id").exec()
+      await collectionModel.deleteMany({user: userID}).exec()
       const deletedUser = await userModel.findOneAndDelete({ _id: userID }).exec()
       deletedUser.collections.map((col) => col._id)
       await collectionModel.deleteMany({"user" : userID})
