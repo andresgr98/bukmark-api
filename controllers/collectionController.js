@@ -199,24 +199,23 @@ router.route("/reading")
     const newBook = req.body
     const userID = req.tokenData._id
     let foundUser = await userModel.findById(userID).populate("collections._id").exec()
-    const readingCollection = foundUser.collections.find((col) => col.is_removable === false)
+    const readingCollection = await collectionModel.findOne({user: userID, is_removable: false}).populate('books._id').exec()
     if (!readingCollection){
       res.status(404).json("No se ha encontrado la lista de lectura. Por favor, cree una nueva cuenta")
       return
     }
-  
+
   let bookExists = await bookModel.findOne({olid: newBook.olid}).exec()
   if (bookExists){
     console.warn( "El libro ya está en la base de datos de Bukmark MongoDB")
     console.log(bookExists.olid)
-    let fullCollection = await collectionModel.findById(readingCollection._id).populate("books._id").exec()
-    let existsInCollection = fullCollection.books.find((book) => book._id.olid === bookExists.olid)
+    let existsInCollection = readingCollection.books.find((book) => book._id.olid === bookExists.olid)
     if(existsInCollection){
       res.status(409).json({message: "El libro ya está en la colección. Inténtalo con otro libro."})
       return
     }
-    foundCollection.books.push(bookExists._id )
-    foundCollection.save()
+    readingCollection.books.push(bookExists._id )
+    readingCollection.save()
     res.status(201).json("Libro añadido a la colección.")
     return
   }
