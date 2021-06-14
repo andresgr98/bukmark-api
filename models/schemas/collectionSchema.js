@@ -7,7 +7,8 @@ const collectionSchema = new Schema({
   books: [
     {
       _id: {type: Schema.Types.ObjectId, ref: 'books'},
-
+      number_of_pages: {type: Number, default: 0, maxlength: 7},
+      current_page: {type: Number, default: 0, maxlength: 7}
     }
   ],
   is_removable: { type: Boolean, default: true },

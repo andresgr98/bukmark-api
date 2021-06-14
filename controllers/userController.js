@@ -94,6 +94,34 @@ router.route("/users/:userID")
       res.status(500).json({ message: error.message });
     }
   })
+
+  router.route("/users/search/:nick")
+  /* --------------------OBTENER USUARIO POR SU NICKNAME---------------------- */
+  .get(onlyRegisteredAccess, async (req, res) => {
+    try {
+      const nick = req.params.nick;
+      /* Comprobamos que el usuario esta intentando acceder a su propio perfil en caso de NO ser admin */
+      /* if (userID !== req.tokenData._id && req.tokenData.profile === "user") {
+        res.status(404).json({
+          message: `Usuario con identificador ${userID} no encontrado.`,
+        });
+        return;
+      } */
+      let foundUser = await userModel.findOne({nickname: nick}).populate("collections._id").populate("reading._id").exec();
+      if (!foundUser) {
+        res.status(404).json({
+          message: `Usuario no encontrado.`,
+        });
+        return;
+      }
+      foundUser = foundUser.toJSON();
+      delete foundUser.password;
+      res.json(foundUser);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  })
+
   /* -------------------- EDITAR NOMBRE DEL USUARIO ------------------- */
   .put(onlyRegisteredAccess, async (req, res) => {
     try {
