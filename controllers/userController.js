@@ -19,17 +19,18 @@ router.route("/users")
     try {
       const limit = req.query.hasOwnProperty("limit")
         ? parseInt(req.query.limit)
-        : 50;
-      let userList = await userModel.find().sort({ firstname: "ASC", lastname: "ASC" }).limit(limit).exec();
+        : 50
+      let userList = await userModel.find().sort({ firstname: "ASC", lastname: "ASC" }).limit(limit).exec()
       userList = userList.map((user) => {
         //duplicamos el array userList y le borramos la contraseña para no devolver nada sensible
-        user = user.toJSON();
-        delete user.password;
-        return user;
+        user = user.toJSON()
+        delete user.email
+        delete user.password
+        return user
       });
-      res.json(userList);
+      res.json(userList)
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      res.status(500).json({ message: error.message })
     }
   })
   /* ---------------------CREAR USUARIO------------------------- */

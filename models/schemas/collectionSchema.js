@@ -6,7 +6,8 @@ const collectionSchema = new Schema({
   user: {type: Schema.Types.ObjectId, ref: 'users'},
   books: [
     {
-      _id: {type: Schema.Types.ObjectId, ref: 'books'}
+      _id: {type: Schema.Types.ObjectId, ref: 'books'},
+
     }
   ],
   is_removable: { type: Boolean, default: true },

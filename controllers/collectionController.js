@@ -169,18 +169,24 @@ router.route('/collections/:collectionID')
 
 
 
-router.route('/collections/:collectionID/books/:OLID')
+router.route('/collections/:collectionID/books/:bookID')
   /* ----------------ELIMINAR UN LIBRO DE UNA COLECCION--------------------- */
   .delete(onlyRegisteredAccess, async (req, res) => {
     try{
       const collectionID = req.params.collectionID
-      const olid = req.params.OLID
+      const bookID = req.params.bookID
+      console.log(bookID)
       const foundCollection = await collectionModel.findById(collectionID).exec()
       if (!foundCollection) {
         res.status(404).json({ message: `Colección con identificador ${collectionID} no encontrada.` })
         return
       }
-      const foundBookIndex = foundCollection.books.findIndex((book) => book.olid === olid)
+      console.log(foundCollection)
+      const foundBookIndex = foundCollection.books.findIndex((book) => book._id == bookID)
+      if(foundBookIndex === -1) {
+        res.status(404).json({ message: `Libro no encontrado.` })
+        return
+      }
       foundCollection.books.splice(foundBookIndex, 1)
       foundCollection.save()
       console.log("Libro eliminado de la colección")
