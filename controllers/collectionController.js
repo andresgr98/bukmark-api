@@ -22,7 +22,6 @@ router.route('/collections')
       let token = req.tokenData
       let userID = token._id
       let foundUser = await userModel.findById(userID).populate("collections._id").exec()
-      foundUser.populate("collections._id.books._id").exec()
       if (!foundUser) {
         res.status(404).json({
           message: `Usuario con identificador ${userID} no encontrado.`,
