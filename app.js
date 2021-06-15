@@ -10,6 +10,7 @@ const userController = require('./controllers/userController')
 const collectionController = require('./controllers/collectionController')
 const bookController = require('./controllers/bookController')
 const authController = require('./controllers/authController')
+const readingController = require('./controllers/readingController')
 
 //server instance
 const app = express()
@@ -26,6 +27,7 @@ app.use(userController)
 app.use(collectionController)
 app.use(bookController)
 app.use(authController)
+app.use(readingController)
 
 database.connect()
 

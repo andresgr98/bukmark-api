@@ -45,7 +45,8 @@ router.route("/users")
         title: "Leyendo",
         user:  userData._id,
         books: [],
-        is_removable: false
+        is_removable: false,
+        visibility: "public"
       }
       let readingListCollection = {
         title: "Lista de lectura",
@@ -107,7 +108,7 @@ router.route("/users/:userID")
         });
         return;
       } */
-      let foundUser = await userModel.findOne({nickname: nick}).populate("collections._id").populate("reading._id").exec();
+      let foundUser = await userModel.findOne({nickname: nick}).exec();
       if (!foundUser) {
         res.status(404).json({
           message: `Usuario no encontrado.`,
@@ -115,7 +116,8 @@ router.route("/users/:userID")
         return;
       }
       foundUser = foundUser.toJSON();
-      delete foundUser.password;
+      delete foundUser.password
+      delete foundUser.email
       res.json(foundUser);
     } catch (error) {
       res.status(500).json({ message: error.message });

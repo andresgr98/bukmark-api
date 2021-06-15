@@ -16,7 +16,7 @@ const onlyAdminAccess = authenticator(true, ['admin'])
 
 
 router.route('/collections')
-  /* ---------------LISTAR COLECCIONES DE UN USUARIO------------- */
+  /* ---------------LISTAR COLECCIONES DEL USUARIO------------- */
   .get(onlyRegisteredAccess, async (req, res) => {
     try {
       let token = req.tokenData
@@ -34,6 +34,8 @@ router.route('/collections')
       res.status(500).json({ message: error.message })
     }
   })
+
+
   /* ---------------CREAR COLECCION--------------- */
   .post(onlyRegisteredAccess, async (req, res) => {
     try {
@@ -113,21 +115,31 @@ router.route('/collections/:collectionID')
       res.status(500).json({ message: error.message })
     }
   })
-  /* -------------------- EDITAR NOMBRE DE LA COLECCION ------------------- */
+  /* -------------------- EDITAR VISIBILIDAD DE LA COLECCION ------------------- */
   .put(onlyRegisteredAccess, async (req, res) => {
     try{
       const collectionID = req.params.collectionID
-      const newName = req.body
       const foundCollection = await collectionModel.findById(collectionID).exec()
       if (foundCollection.is_removable === false) {
         res.status(401).json({message: "No puedes editar esta colección"})
         return
       }
-      const updatedCollection = await collectionModel.findOneAndUpdate({_id: collectionID}, newName, { new: true }).exec()
-      if (!updatedCollection) {
-        res.status(404).json({ message: `Colección con identificador ${collectionID} no encontrada.` })
+      let vis = foundCollection.visibility
+      if(vis === "private"){
+        vis = "public"
+      }
+      if(vis === "public"){
+        vis = "private"
+      }
+      vis = {
+        visibility: vis
+      }
+      let updatedCollection = await collectionModel.findOneAndUpdate({_id: collectionID}, vis, {new: true}).exec()
+      if (!updatedCollection){
+        res.status(404).json({message: "Colección no actualizada"})
         return
       }
+      foundCollection.save()
       res.json(updatedCollection)
     }catch(error){
       res.status(500).json({ message: error.message })
@@ -199,6 +211,7 @@ router.route('/collections/:collectionID/books/:bookID')
 
 /* ************************************************************************************************ */
 router.route('/reading')
+/* ----------------ACCEDER A LA LISTA DE LECTURA DEL USUARIO -------------- */
 .get(onlyRegisteredAccess, async (req, res) => {
   try{
     const userID = req.tokenData._id
@@ -212,4 +225,39 @@ router.route('/reading')
   }
 })
 
+
+/* ************************************************************** */
+
+router.route('/users/search/:nick/collections')
+/* -------------MOSTRAR COLECCIONES PUBLICAS DE UN USUARIO ------------- */
+.get(onlyRegisteredAccess, async(req, res) => {
+  try {
+    let nick = req.params.nick
+    let foundUser = await userModel.findOne({nickname: nick}).populate("collections._id").exec()
+    if (!foundUser) {
+      res.status(404).json({
+        message: `Usuario con identificador ${userID} no encontrado.`,
+      });
+      return;
+    }
+    const collectionList = foundUser.collections.filter((item) => item._id.visibility === "public")
+    res.json(collectionList)
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+})
+ router.route('/users/search/:nick/collections/:collectionID')
+ .get(onlyRegisteredAccess, async(req, res) => {
+  try{
+    const collectionID = req.params.collectionID
+    const foundCollection = await collectionModel.findById(collectionID).populate("books._id").exec()
+    if (!foundCollection) {
+      res.status(404).json({ message: `Colección con identificador ${collectionID} no encontrada.` })
+      return
+    }
+    res.json(foundCollection)
+  }catch(error){
+    res.status(500).json({ message: error.message })
+  }
+})
 module.exports = router

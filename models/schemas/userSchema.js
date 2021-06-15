@@ -7,9 +7,9 @@ let userSchema = new Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true, minlength: 6, maxlength: 200 },
   profile: { type: String, required: false, enum: ["admin", "user"], default: 'user' },
-  reading: [
+  pages: [
     {
-      _id: {type: Schema.Types.ObjectId, ref: 'books'}
+      type: Schema.Types.ObjectId, ref: 'pages'
     }
   ],
   collections: [
