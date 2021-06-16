@@ -119,28 +119,14 @@ router.route('/collections/:collectionID')
   .put(onlyRegisteredAccess, async (req, res) => {
     try{
       const collectionID = req.params.collectionID
-      const foundCollection = await collectionModel.findById(collectionID).exec()
-      if (foundCollection.is_removable === false) {
-        res.status(401).json({message: "No puedes editar esta colección"})
-        return
+      const visibility = req.body
+      let foundCollection = await collectionModel.findById(collectionID).exec()
+      let updatedItem = await collectionModel.findOneAndUpdate({_id: collectionID}, visibility, {new: true}).exec()
+      if(!updatedItem){
+        res.status(401).json({message: "Coleccion no encontrada"})
       }
-      let vis = foundCollection.visibility
-      if(vis === "private"){
-        vis = "public"
-      }
-      if(vis === "public"){
-        vis = "private"
-      }
-      vis = {
-        visibility: vis
-      }
-      let updatedCollection = await collectionModel.findOneAndUpdate({_id: collectionID}, vis, {new: true}).exec()
-      if (!updatedCollection){
-        res.status(404).json({message: "Colección no actualizada"})
-        return
-      }
-      foundCollection.save()
-      res.json(updatedCollection)
+      await foundCollection.save()
+      res.json(updatedItem)
     }catch(error){
       res.status(500).json({ message: error.message })
     }
